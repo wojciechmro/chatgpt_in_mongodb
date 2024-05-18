@@ -11,8 +11,8 @@ db = mongodb_client["chatbot"]  # choosing database
 sessions = db["sessions"]  # choosing collection
 
 # Set user and session to be used for the chat
-user_id = "user123"
-session_id = "session123"
+user_id = input("Enter user_id: ")  # e.g. "user123"
+session_id = input("Enter session_id: ")  # e.g. "session123"
 
 # Create index for 'user_id' and 'session_id' to optimize queries
 sessions.create_index([("user_id", 1), ("session_id", 1)])
