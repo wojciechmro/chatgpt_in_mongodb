@@ -60,6 +60,8 @@ def main():
     conversation = get_last_conversation()
     while True:
         user_input = input("User: ")
+        if user_input.lower() in ["exit", "quit"]:
+            break
         response = chat_with_openai(user_input, conversation)
 
         conversation.append({"role": "user", "content": user_input})
