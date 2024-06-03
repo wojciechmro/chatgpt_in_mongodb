@@ -36,11 +36,11 @@ def print_chat_history(conversation):
         print(f"{message['role'].capitalize()}: {message['content']}")
 
 
-def save_conversation(conversation):
-    """Update or insert current conversation into MongoDB for specified user and session."""
+def append_message_to_conversation(message, role):
+    """Append a message to the current conversation in MongoDB for specified user and session."""
     chat_sessions.update_one(
         {"user_id": user_id, "session_id": session_id},
-        {"$set": {"conversation": conversation}},
+        {"$push": {"conversation": {"role": role, "content": message}}},
         upsert=True,
     )
 
@@ -62,9 +62,15 @@ def main():
     while True:
         user_input = input("User: ")
         response = chat_with_openai(user_input, conversation)
+
+        # Append new messages to the MongoDB conversation
         conversation.append({"role": "user", "content": user_input})
         conversation.append({"role": "assistant", "content": response})
-        save_conversation(conversation)
+
+        # Update local conversation list for context
+        append_message_to_conversation(user_input, "user")
+        append_message_to_conversation(response, "assistant")
+
         print("Assistant:", response)
 
 
