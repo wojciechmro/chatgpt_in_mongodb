@@ -1,0 +1,31 @@
+@startuml
+actor User
+participant "Chat Application\n(chat.py)" as App
+participant "MongoDB Client" as MongoClient
+database "MongoDB" as MongoDB
+participant "OpenAI API"
+
+User -> App: Start application
+App -> MongoClient: Initialize MongoDB client
+
+User -> App: Input user_id and session_id
+App -> MongoClient: Retrieve last conversation (user_id, session_id)
+MongoClient -> MongoDB: Query last conversation
+alt Conversation exists
+    MongoDB -> MongoClient: Return conversation
+else No conversation
+    MongoDB -> MongoClient: Return default message
+end
+MongoClient -> App: Return conversation or default message
+
+loop Chat Session
+    User -> App: Input message
+    App -> "OpenAI API": Send message and conversation history
+    "OpenAI API" -> App: Return response
+
+    App -> MongoClient: Append user and assistant message to conversation 
+    MongoClient -> MongoDB: Update conversation
+
+    App -> User: Print assistant response
+end
+@enduml
