@@ -36,11 +36,11 @@ def print_chat_history(conversation):
         print(f"{message['role'].capitalize()}: {message['content']}")
 
 
-def append_message_to_conversation(message, role):
-    """Append a message to the current conversation in MongoDB for specified user and session."""
+def append_messages_to_conversation(messages):
+    """Append messages to the current conversation in MongoDB for specified user and session."""
     chat_sessions.update_one(
         {"user_id": user_id, "session_id": session_id},
-        {"$push": {"conversation": {"role": role, "content": message}}},
+        {"$push": {"conversation": {"$each": messages}}},
         upsert=True,
     )
 
@@ -49,10 +49,7 @@ def chat_with_openai(message, conversation):
     """Send user message to OpenAI API and return chatbot's response based on conversation history."""
     response = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=conversation
-        + [
-            {"role": "user", "content": message},
-        ],
+        messages=conversation + [{"role": "user", "content": message}],
     )
     return response.choices[0].message.content
 
@@ -63,13 +60,15 @@ def main():
         user_input = input("User: ")
         response = chat_with_openai(user_input, conversation)
 
-        # Append new messages to the MongoDB conversation
         conversation.append({"role": "user", "content": user_input})
         conversation.append({"role": "assistant", "content": response})
 
-        # Update local conversation list for context
-        append_message_to_conversation(user_input, "user")
-        append_message_to_conversation(response, "assistant")
+        append_messages_to_conversation(
+            [
+                {"role": "user", "content": user_input},
+                {"role": "assistant", "content": response},
+            ]
+        )
 
         print("Assistant:", response)
 
