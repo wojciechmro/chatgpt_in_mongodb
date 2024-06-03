@@ -8,19 +8,19 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # Initialize MongoDB client
 mongodb_client = MongoClient("mongodb://localhost:27017/")
 db = mongodb_client["chatbot"]  # choosing database
-sessions = db["sessions"]  # choosing collection
+chat_sessions = db["chat_sessions"]  # choosing collection
 
 # Set user and session to be used for the chat
 user_id = input("Enter user_id: ")  # e.g. "user123"
 session_id = input("Enter session_id: ")  # e.g. "session123"
 
 # Create index for 'user_id' and 'session_id' to optimize queries
-sessions.create_index([("user_id", 1), ("session_id", 1)])
+chat_sessions.create_index([("user_id", 1), ("session_id", 1)])
 
 
 def get_last_conversation():
     """Retrieve last conversation from MongoDB or return default message if none exists."""
-    session = sessions.find_one({"user_id": user_id, "session_id": session_id})
+    session = chat_sessions.find_one({"user_id": user_id, "session_id": session_id})
     if session and "conversation" in session:
         print_chat_history(session["conversation"])
         return session["conversation"]
@@ -38,7 +38,7 @@ def print_chat_history(conversation):
 
 def save_conversation(conversation):
     """Update or insert current conversation into MongoDB for specified user and session."""
-    sessions.update_one(
+    chat_sessions.update_one(
         {"user_id": user_id, "session_id": session_id},
         {"$set": {"conversation": conversation}},
         upsert=True,
