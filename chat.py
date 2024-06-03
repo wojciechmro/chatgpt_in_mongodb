@@ -14,7 +14,9 @@ chat_sessions = db["chat_sessions"]  # choosing collection
 user_id = input("Enter user_id: ")  # e.g. "user123"
 session_id = input("Enter session_id: ")  # e.g. "session123"
 
-# Create index for 'user_id' and 'session_id' to optimize queries
+# Create index for 'user_id' and 'session_id' to optimize queries for chat history
+# NOTE: Creating index should be done only once during db setup,
+# NOTE: we create it every time for the sake of simplicity
 chat_sessions.create_index([("user_id", 1), ("session_id", 1)])
 
 
