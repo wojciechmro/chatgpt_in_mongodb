@@ -1,7 +1,18 @@
+# Prerequisites
+
+- Python
+- MongoDB
+
 # Venv setup
 
 ```bash
 python -m venv myenv
-source venv/bin/activate
+source myenv/bin/activate
 pip install -r requirements.txt
+```
+
+# Run
+
+```bash
+python chat.py
 ```
